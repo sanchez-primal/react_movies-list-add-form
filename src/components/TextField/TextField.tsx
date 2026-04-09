@@ -10,9 +10,8 @@ type Props = {
   onChange?: (newValue: string) => void;
   satisfiesCustomValidation?: boolean;
   customValidationErrorMessage?: string;
-  onError?: () => void;
-  onErrorClear?: () => void;
-  onTouch?: () => void;
+  onCustomValidationError?: () => void;
+  onCustomValidationErrorClear?: () => void;
 };
 
 function getRandomDigits() {
@@ -28,32 +27,26 @@ export const TextField: React.FC<Props> = ({
   onChange = () => {},
   satisfiesCustomValidation = true,
   customValidationErrorMessage = '',
-  onError = () => {},
-  onErrorClear = () => {},
-  onTouch = () => {},
+  onCustomValidationError = () => {},
+  onCustomValidationErrorClear = () => {},
 }) => {
   const [id] = useState(() => `${name}-${getRandomDigits()}`);
 
   const [touched, setTouched] = useState(false);
-  const [touchSignaled, setTouchSignaled] = useState(false);
 
   const hasError = touched && required && !value;
   const hasCustomValidationError = touched && !satisfiesCustomValidation;
-  const [errorSignaled, setErrorSignaled] = useState(false);
+  const [customValidationErrorSignaled, setCustomValidationErrorSignaled] =
+    useState(false);
 
-  if (touched && !touchSignaled) {
-    onTouch();
-    setTouchSignaled(true);
+  if (hasCustomValidationError && !customValidationErrorSignaled) {
+    onCustomValidationError();
+    setCustomValidationErrorSignaled(true);
   }
 
-  if ((hasError || hasCustomValidationError) && !errorSignaled) {
-    onError();
-    setErrorSignaled(true);
-  }
-
-  if (!hasError && !hasCustomValidationError && errorSignaled) {
-    onErrorClear();
-    setErrorSignaled(false);
+  if (!hasCustomValidationError && customValidationErrorSignaled) {
+    onCustomValidationErrorClear();
+    setCustomValidationErrorSignaled(false);
   }
 
   return (

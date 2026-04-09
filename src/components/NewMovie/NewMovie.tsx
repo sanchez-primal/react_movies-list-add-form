@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 import { TextField } from '../TextField';
-import {
-  Movie,
-  RequiredFields,
-  RequiredFieldsTouchedState,
-} from '../../types/Movie';
+import { Movie, RequiredFieldsEmptyState } from '../../types/Movie';
 
 type Props = {
   onAdd: (movie: Movie) => void;
@@ -18,11 +14,11 @@ const EMPTY_MOVIE_DATA = {
   imdbId: '',
 };
 
-const REQUIRED_FIELDS_TOUCHED_STATE = {
-  title: false,
-  imgUrl: false,
-  imdbUrl: false,
-  imdbId: false,
+const REQUIRED_FIELDS_INITIAL_EMPTY_STATE = {
+  title: true,
+  imgUrl: true,
+  imdbUrl: true,
+  imdbId: true,
 };
 
 const validURLPattern = new RegExp(
@@ -34,40 +30,53 @@ const validURLPattern = new RegExp(
 export const NewMovie: React.FC<Props> = ({ onAdd }) => {
   const [count, setCount] = useState(0);
   const [movieData, setMovieData] = useState<Movie>({ ...EMPTY_MOVIE_DATA });
+  const [emptyFields, setEmptyFields] = useState<RequiredFieldsEmptyState>({
+    ...REQUIRED_FIELDS_INITIAL_EMPTY_STATE,
+  });
+  const [emptyFieldCount, setEmptyFieldCount] = useState(4);
+  const hasEmptyRequiredField = emptyFieldCount > 0;
 
-  const [touchedElements, setTouchedElements] =
-    useState<RequiredFieldsTouchedState>({
-      ...REQUIRED_FIELDS_TOUCHED_STATE,
-    });
-  const [untouchedCount, setUntouchedCount] = useState(4);
-  const allTouched = untouchedCount === 0;
+  const [customValidationErrorCount, setCustomValidationErrorCount] =
+    useState(0);
 
-  const [blockerCount, setBlockerCount] = useState(0);
-  const hasError = blockerCount > 0;
-
-  const isSubmitDisabled = hasError || !allTouched;
+  const isSubmitDisabled =
+    hasEmptyRequiredField || customValidationErrorCount > 0;
 
   function handleChange(fieldName: keyof Movie, input: string) {
     let value = input.trim();
+    let isFieldEmpty: boolean;
+    let emptyFieldCountChange: number;
 
-    value = value === '' ? value : input;
+    if (value === '') {
+      if (fieldName !== 'description') {
+        isFieldEmpty = true;
+        emptyFieldCountChange = 1;
+      }
+    } else {
+      value = input;
+
+      if (fieldName !== 'description') {
+        isFieldEmpty = false;
+        emptyFieldCountChange = -1;
+      }
+    }
 
     setMovieData(current => ({ ...current, [fieldName]: value }));
-  }
 
-  function handleTouch(fieldName: keyof RequiredFields) {
-    if (!touchedElements[fieldName]) {
-      setTouchedElements(current => ({ ...current, [fieldName]: true }));
-      setUntouchedCount(current => current - 1);
+    if (fieldName !== 'description') {
+      if (emptyFields[fieldName] === !isFieldEmpty!) {
+        setEmptyFields(current => ({ ...current, [fieldName]: isFieldEmpty }));
+        setEmptyFieldCount(current => current + emptyFieldCountChange!);
+      }
     }
   }
 
-  function handleFieldError() {
-    setBlockerCount(current => current + 1);
+  function handleCustomValidationError() {
+    setCustomValidationErrorCount(current => current + 1);
   }
 
-  function handleFieldErrorClear() {
-    setBlockerCount(current => current - 1);
+  function handleCustomValidationErrorClear() {
+    setCustomValidationErrorCount(current => current - 1);
   }
 
   function handleSubmit(event: React.FormEvent) {
@@ -79,9 +88,10 @@ export const NewMovie: React.FC<Props> = ({ onAdd }) => {
 
     onAdd(movieData);
     setMovieData({ ...EMPTY_MOVIE_DATA });
-    setTouchedElements({ ...REQUIRED_FIELDS_TOUCHED_STATE });
-    setUntouchedCount(4);
+
     setCount(current => current + 1);
+    setEmptyFields({ ...REQUIRED_FIELDS_INITIAL_EMPTY_STATE });
+    setEmptyFieldCount(4);
   }
 
   return (
@@ -94,9 +104,8 @@ export const NewMovie: React.FC<Props> = ({ onAdd }) => {
         value={movieData.title}
         onChange={input => handleChange('title', input)}
         required
-        onError={handleFieldError}
-        onErrorClear={handleFieldErrorClear}
-        onTouch={() => handleTouch('title')}
+        onCustomValidationError={handleCustomValidationError}
+        onCustomValidationErrorClear={handleCustomValidationErrorClear}
       />
 
       <TextField
@@ -114,9 +123,8 @@ export const NewMovie: React.FC<Props> = ({ onAdd }) => {
         required
         satisfiesCustomValidation={validURLPattern.test(movieData.imgUrl)}
         customValidationErrorMessage="The URL is invalid."
-        onError={handleFieldError}
-        onErrorClear={handleFieldErrorClear}
-        onTouch={() => handleTouch('imgUrl')}
+        onCustomValidationError={handleCustomValidationError}
+        onCustomValidationErrorClear={handleCustomValidationErrorClear}
       />
 
       <TextField
@@ -127,9 +135,8 @@ export const NewMovie: React.FC<Props> = ({ onAdd }) => {
         required
         satisfiesCustomValidation={validURLPattern.test(movieData.imdbUrl)}
         customValidationErrorMessage="The URL is invalid."
-        onError={handleFieldError}
-        onErrorClear={handleFieldErrorClear}
-        onTouch={() => handleTouch('imdbUrl')}
+        onCustomValidationError={handleCustomValidationError}
+        onCustomValidationErrorClear={handleCustomValidationErrorClear}
       />
 
       <TextField
@@ -138,9 +145,8 @@ export const NewMovie: React.FC<Props> = ({ onAdd }) => {
         value={movieData.imdbId}
         onChange={input => handleChange('imdbId', input)}
         required
-        onError={handleFieldError}
-        onErrorClear={handleFieldErrorClear}
-        onTouch={() => handleTouch('imdbId')}
+        onCustomValidationError={handleCustomValidationError}
+        onCustomValidationErrorClear={handleCustomValidationErrorClear}
       />
 
       <div className="field is-grouped">
