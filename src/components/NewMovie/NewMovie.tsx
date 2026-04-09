@@ -14,6 +14,13 @@ const EMPTY_MOVIE_DATA = {
   imdbId: '',
 };
 
+const REQUIRED_FIELDS_INITIAL_EMPTY_STATE = {
+  title: true,
+  imgUrl: true,
+  imdbUrl: true,
+  imdbId: true,
+};
+
 const validURLPattern = new RegExp(
   '^((([A-Za-z]{3,9}:(?:\\/\\/)?)(?:[-;:&=+$,\\w]+@)?[A-Za-z0-9.-]+|' +
     '(?:www\\.|[-;:&=+$,\\w]+@)[A-Za-z0-9.-]+)' +
@@ -22,12 +29,9 @@ const validURLPattern = new RegExp(
 
 export const NewMovie: React.FC<Props> = ({ onAdd }) => {
   const [count, setCount] = useState(0);
-  const [movieData, setMovieData] = useState<Movie>(EMPTY_MOVIE_DATA);
+  const [movieData, setMovieData] = useState<Movie>({ ...EMPTY_MOVIE_DATA });
   const [emptyFields, setEmptyFields] = useState<RequiredFieldsEmptyState>({
-    title: true,
-    imgUrl: true,
-    imdbUrl: true,
-    imdbId: true,
+    ...REQUIRED_FIELDS_INITIAL_EMPTY_STATE,
   });
   const [emptyFieldCount, setEmptyFieldCount] = useState(4);
   const hasError = emptyFieldCount > 0;
@@ -69,7 +73,8 @@ export const NewMovie: React.FC<Props> = ({ onAdd }) => {
     }
 
     onAdd(movieData);
-    setMovieData(EMPTY_MOVIE_DATA);
+    setMovieData({ ...EMPTY_MOVIE_DATA });
+    setEmptyFields({ ...REQUIRED_FIELDS_INITIAL_EMPTY_STATE });
     setCount(current => current + 1);
   }
 
