@@ -5,3 +5,9 @@ export interface Movie {
   imdbUrl: string;
   imdbId: string;
 }
+
+/* eslint-disable */
+export type RequiredFieldsEmptyState = Omit<
+  Record<keyof Movie, boolean>,
+  'description'
+>;
