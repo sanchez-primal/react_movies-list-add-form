@@ -6,8 +6,6 @@ export interface Movie {
   imdbId: string;
 }
 
-/* eslint-disable */
-export type RequiredFieldsEmptyState = Omit<
-  Record<keyof Movie, boolean>,
-  'description'
->;
+export type RequiredFields = Omit<Movie, 'description'>;
+export type RequiredFieldsEmptyState = Record<keyof RequiredFields, boolean>;
+export type RequiredFieldsTouchedState = Record<keyof RequiredFields, boolean>;
