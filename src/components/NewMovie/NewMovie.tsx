@@ -15,9 +15,9 @@ const EMPTY_MOVIE_DATA = {
 };
 
 const validURLPattern = new RegExp(
-  '^((([A-Za-z]{3,9}:(?://)?)(?:[-;:&=+$,w]+@)?[A-Za-z0-9.-]+|' +
-    '(?:www.|[-;:&=+$,w]+@)[A-Za-z0-9.-]+)' +
-    '((?:/[+~%/.w-_]*)???(?:[-+=&;%@,.w_]*)#?(?:[,.!/\\w]*))?)$',
+  '^((([A-Za-z]{3,9}:(?:\\/\\/)?)(?:[-;:&=+$,\\w]+@)?[A-Za-z0-9.-]+|' +
+    '(?:www\\.|[-;:&=+$,\\w]+@)[A-Za-z0-9.-]+)' +
+    '((?:\\/[+~%/.\\w-_]*)?\\??(?:[-+=&;%@,.\\w_]*)#?(?:[,.!/\\\\\\w]*))?)$',
 );
 
 export const NewMovie: React.FC<Props> = ({ onAdd }) => {
@@ -33,57 +33,33 @@ export const NewMovie: React.FC<Props> = ({ onAdd }) => {
   const hasError = emptyFieldCount > 0;
 
   function handleChange(fieldName: keyof Movie, input: string) {
-    if (input.trim() === '') {
-      setMovieData(current => ({ ...current, [fieldName]: '' }));
-
-      if (fieldName !== 'description') {
-        if (!emptyFields[fieldName]) {
-          setEmptyFields(current => ({ ...current, [fieldName]: true }));
-          setEmptyFieldCount(current => current + 1);
-        }
-      }
-    } else {
-      setMovieData(current => ({ ...current, [fieldName]: input }));
-
-      if (fieldName !== 'description') {
-        if (emptyFields[fieldName]) {
-          setEmptyFields(current => ({ ...current, [fieldName]: false }));
-          setEmptyFieldCount(current => current - 1);
-        }
-      }
-    }
-  }
-
-  /*
-  function handleChange(fieldName: keyof Movie, input: string) {
     let value = input.trim();
-    let fieldCondition: boolean;
+    let isFieldEmpty: boolean;
     let emptyFieldCountChange: number;
 
     if (value === '') {
       if (fieldName !== 'description') {
-        fieldCondition = !emptyFields[fieldName];
-        emptyFieldCountChange = emptyFieldCount + 1;
+        isFieldEmpty = true;
+        emptyFieldCountChange = 1;
       }
     } else {
       value = input;
 
       if (fieldName !== 'description') {
-        fieldCondition = emptyFields[fieldName];
-        emptyFieldCountChange = emptyFieldCount - 1;
+        isFieldEmpty = false;
+        emptyFieldCountChange = -1;
       }
     }
 
     setMovieData(current => ({ ...current, [fieldName]: value }));
 
     if (fieldName !== 'description') {
-      if (fieldCondition!) {
-        setEmptyFields(current => ({ ...current, [fieldName]: !fieldCondition }));
-        setEmptyFieldCount(emptyFieldCountChange!);
+      if (emptyFields[fieldName] === !isFieldEmpty!) {
+        setEmptyFields(current => ({ ...current, [fieldName]: isFieldEmpty }));
+        setEmptyFieldCount(current => current + emptyFieldCountChange!);
       }
     }
   }
-  */
 
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
